@@ -1,0 +1,19 @@
+/* css/styles.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #282c34; /* Fallback background color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#game-container {
+    width: 800px;
+    height: 600px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    position: relative;
+}
