@@ -2,15 +2,9 @@
 
 const config = {
     type: Phaser.AUTO,
-    width: 800, // Base width
-    height: 600, // Base height
+    width: 800,
+    height: 600,
     parent: 'game-container',
-    scale: {
-        mode: Phaser.Scale.FIT, // Scale the game to fit the screen
-        autoCenter: Phaser.Scale.CENTER_BOTH, // Center the game both horizontally and vertically
-        width: window.innerWidth,
-        height: window.innerHeight
-    },
     physics: {
         default: 'arcade',
         arcade: {
@@ -26,11 +20,6 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-
-// Resize game on window resize
-window.addEventListener('resize', () => {
-    game.scale.resize(window.innerWidth, window.innerHeight);
-});
 
 let bozo;
 let tokens;
@@ -50,16 +39,6 @@ let shareButton;
 let tokenSpeed = 150; // Initial token speed
 let isPlaying = false; // Flag to indicate if the game is active
 
-// Touch control flags
-let leftPressed = false;
-let rightPressed = false;
-let jumpPressed = false;
-
-// UI Buttons
-let leftButton;
-let rightButton;
-let jumpButton;
-
 function preload () {
     // Load Bozo images for evolution stages
     this.load.image('bozo_0', 'assets/bozo_0.png'); // Initial Bozo
@@ -69,16 +48,9 @@ function preload () {
     
     // Load logo image
     this.load.image('logo', 'assets/logo.png'); // Replace with your logo file
-
-    // Load button images
-    this.load.image('leftButton', 'assets/leftButton.png'); // Replace with your left button image
-    this.load.image('rightButton', 'assets/rightButton.png'); // Replace with your right button image
-    this.load.image('jumpButton', 'assets/jumpButton.png'); // Replace with your jump button image
 }
 
 function create () {
-    const scene = this;
-
     // Set solid color background
     this.cameras.main.setBackgroundColor('#1E90FF'); // Dodger Blue
     
@@ -144,9 +116,6 @@ function create () {
     
     // Create Countdown Elements
     createCountdown(this);
-    
-    // Create Touch Controls (on-screen buttons)
-    createTouchControls(this);
 }
 
 function update () {
@@ -155,7 +124,6 @@ function update () {
     // Retrieve Bozo's current speed
     const speed = bozo.getData('speed') || 200; // Default speed is 200
     
-    // Handle keyboard input
     if (cursors.left.isDown) {
         bozo.setVelocityX(-speed);
         bozo.flipX = true;
@@ -170,26 +138,6 @@ function update () {
     
     if (cursors.up.isDown && bozo.body.touching.down) {
         bozo.setVelocityY(-330);
-    }
-    
-    // Handle touch input
-    if (leftPressed) {
-        bozo.setVelocityX(-speed);
-        bozo.flipX = true;
-    }
-    else if (rightPressed) {
-        bozo.setVelocityX(speed);
-        bozo.flipX = false;
-    }
-    else {
-        if (!cursors.left.isDown && !cursors.right.isDown) {
-            bozo.setVelocityX(0);
-        }
-    }
-    
-    if (jumpPressed && bozo.body.touching.down) {
-        bozo.setVelocityY(-330);
-        jumpPressed = false; // Prevent continuous jumping
     }
     
     // Update Timer
@@ -380,60 +328,31 @@ function startGame(scene) {
     });
 }
 
-// Function to create Touch Controls (on-screen buttons)
-function createTouchControls(scene) {
-    // Define button size and position
-    const buttonSize = 60;
-    const padding = 20;
+// Function to evolve Bozo
+function evolveBozo(scene) {
+    evolutionStage += 1; // Move to the next evolution stage
     
-    // Left Button
-    leftButton = scene.add.image(padding + buttonSize / 2, scene.scale.height - padding - buttonSize / 2, 'leftButton');
-    leftButton.setScale(0.5);
-    leftButton.setInteractive();
-    leftButton.on('pointerdown', () => {
-        leftPressed = true;
-        leftButton.setTint(0xcccccc); // Visual feedback
-    });
-    leftButton.on('pointerup', () => {
-        leftPressed = false;
-        leftButton.clearTint(); // Reset tint
-    });
-    leftButton.on('pointerout', () => {
-        leftPressed = false;
-        leftButton.clearTint(); // Reset tint
-    });
+    // Update Bozo's texture and maintain scale at 0.5
+    bozo.setTexture(bozoTextures[evolutionStage].key);
+    bozo.setScale(bozoTextures[evolutionStage].scale);
     
-    // Right Button
-    rightButton = scene.add.image(padding * 2 + buttonSize + buttonSize / 2, scene.scale.height - padding - buttonSize / 2, 'rightButton');
-    rightButton.setScale(0.5);
-    rightButton.setInteractive();
-    rightButton.on('pointerdown', () => {
-        rightPressed = true;
-        rightButton.setTint(0xcccccc); // Visual feedback
-    });
-    rightButton.on('pointerup', () => {
-        rightPressed = false;
-        rightButton.clearTint(); // Reset tint
-    });
-    rightButton.on('pointerout', () => {
-        rightPressed = false;
-        rightButton.clearTint(); // Reset tint
-    });
+    // Increase Bozo's speed
+    const speedIncrease = 50; // Increase speed by 50 pixels/sec each stage
+    const currentSpeed = bozo.getData('speed');
+    bozo.setData('speed', currentSpeed + speedIncrease);
     
-    // Jump Button
-    jumpButton = scene.add.image(scene.scale.width - padding - buttonSize / 2, scene.scale.height - padding - buttonSize / 2, 'jumpButton');
-    jumpButton.setScale(0.5);
-    jumpButton.setInteractive();
-    jumpButton.on('pointerdown', () => {
-        jumpPressed = true;
-        jumpButton.setTint(0xcccccc); // Visual feedback
+    // Increase token speed after each stage
+    tokenSpeed += 20; // Increase token speed by 20 pixels/sec each stage
+    
+    // Display Evolution Message
+    const evolutionText = scene.add.text(scene.scale.width / 2, scene.scale.height / 2, 'Bozo Evolved!', { 
+        fontSize: '48px', 
+        fill: '#FFFF00', 
+        fontFamily: 'Arial', 
+        fontStyle: 'bold' 
     });
-    jumpButton.on('pointerup', () => {
-        // jumpPressed remains true until handled in update
-        jumpButton.clearTint(); // Reset tint
-    });
-    jumpButton.on('pointerout', () => {
-        jumpPressed = false;
-        jumpButton.clearTint(); // Reset tint
-    });
+    evolutionText.setOrigin(0.5);
+    scene.time.delayedCall(2000, () => {
+        evolutionText.destroy();
+    }, [], scene);
 }
