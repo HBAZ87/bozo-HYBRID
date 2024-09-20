@@ -3,15 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bozo's Crypto Caper</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <!-- Phaser.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <title>Bozo Crypto Caper</title>
+    <style>
+        /* Reset default margins and paddings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Ensure the HTML and body take up the full height */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        /* Style the game container to fill the viewport */
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Optional: Style for the share button to ensure visibility */
+        .share-button {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div id="game-container"></div>
 
-    <!-- Main Game Script -->
+    <!-- Include Phaser Library -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+
+    <!-- Include Your Game Script -->
     <script src="js/main.js"></script>
 </body>
 </html>
