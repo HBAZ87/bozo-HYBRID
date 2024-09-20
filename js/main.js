@@ -46,7 +46,7 @@ let tokenSpeed = 150; // Initial token speed
 let isPlaying = false; // Flag to indicate if the game is active
 
 // Mobile Controls
-let leftButton, rightButton, jumpButton;
+let leftButton, rightButton;
 
 function preload () {
     // Load Bozo images for evolution stages
@@ -140,7 +140,6 @@ function update () {
 
     let moveLeft = false;
     let moveRight = false;
-    let jump = false;
 
     // Keyboard Controls (for desktop)
     if (!isMobileDevice.call(this)) {
@@ -151,8 +150,8 @@ function update () {
             moveRight = true;
         }
 
-        if (cursors.up.isDown) {
-            jump = true;
+        if (cursors.up.isDown && bozo.body.touching.down) {
+            bozo.setVelocityY(-330);
         }
     }
 
@@ -164,14 +163,7 @@ function update () {
         if (rightButton && rightButton.isDown) {
             moveRight = true;
         }
-        if (jumpButton && jumpButton.isDown) {
-            jump = true;
-        }
     }
-
-    // Debug Input Flags
-    // Uncomment the line below to see input flags in the console
-    // console.log(`Move Left: ${moveLeft}, Move Right: ${moveRight}, Jump: ${jump}`);
 
     // Retrieve Bozo's current speed
     const speed = bozo.getData('speed') || 200; // Default speed is 200
@@ -186,10 +178,6 @@ function update () {
     }
     else {
         bozo.setVelocityX(0);
-    }
-
-    if (jump && bozo.body.touching.down) {
-        bozo.setVelocityY(-330);
     }
 
     // Update Timer
@@ -380,8 +368,6 @@ function startGame(scene) {
     });
 }
 
-											  
-
 // Utility Function to detect Mobile Devices
 function isMobileDevice() {
     return this.sys.game.device.os.android || this.sys.game.device.os.iOS;
@@ -389,103 +375,83 @@ function isMobileDevice() {
 
 // Function to create on-screen controls
 function createOnScreenControls(scene) {
-    const buttonSize = 60;
-    const padding = 20;
+    const buttonSize = 80; // Increased button size for better touch targets
+    const padding = 30; // Increased padding for better spacing
 
     // Left Button
     leftButton = scene.add.zone(padding + buttonSize / 2, scene.scale.height - padding - buttonSize / 2, buttonSize, buttonSize)
         .setScrollFactor(0)
         .setDepth(1)
         .setInteractive();
+
+    // Draw Left Button Graphics (Semi-transparent Blue)
     const leftGraphics = scene.add.graphics();
-    leftGraphics.fillStyle(0x000000, 0.5);
+    leftGraphics.fillStyle(0x1E90FF, 0.7); // Dodger Blue with 70% opacity
     leftGraphics.fillCircle(0, 0, buttonSize / 2);
-    leftGraphics.generateTexture('leftButton', buttonSize, buttonSize);
+    leftGraphics.generateTexture('leftButtonTexture', buttonSize, buttonSize);
     leftGraphics.destroy();
-    scene.add.image(leftButton.x, leftButton.y, 'leftButton').setDepth(1);
-							 
-    scene.add.text(leftButton.x, leftButton.y, '◀', { fontSize: '32px', fill: '#ffffff' }).setOrigin(0.5).setDepth(2);
+
+    // Add Left Button Image
+    const leftButtonImage = scene.add.image(leftButton.x, leftButton.y, 'leftButtonTexture').setDepth(1).setName('leftButtonImage');
+    // Add Left Arrow Text
+    scene.add.text(leftButton.x, leftButton.y, '◀', { fontSize: '36px', fill: '#ffffff' }).setOrigin(0.5).setDepth(2);
 
     // Right Button
-    rightButton = scene.add.zone(padding * 2 + buttonSize * 1.5, scene.scale.height - padding - buttonSize / 2, buttonSize, buttonSize)
+    rightButton = scene.add.zone(scene.scale.width - padding - buttonSize / 2, scene.scale.height - padding - buttonSize / 2, buttonSize, buttonSize)
         .setScrollFactor(0)
         .setDepth(1)
         .setInteractive();
+
+    // Draw Right Button Graphics (Semi-transparent Green)
     const rightGraphics = scene.add.graphics();
-    rightGraphics.fillStyle(0x000000, 0.5);
+    rightGraphics.fillStyle(0x1E90FF, 0.7); // Lime Green with 70% opacity
     rightGraphics.fillCircle(0, 0, buttonSize / 2);
-    rightGraphics.generateTexture('rightButton', buttonSize, buttonSize);
+    rightGraphics.generateTexture('rightButtonTexture', buttonSize, buttonSize);
     rightGraphics.destroy();
-    scene.add.image(rightButton.x, rightButton.y, 'rightButton').setDepth(1);
-							  
-    scene.add.text(rightButton.x, rightButton.y, '▶', { fontSize: '32px', fill: '#ffffff' }).setOrigin(0.5).setDepth(2);
 
-    // Jump Button
-    jumpButton = scene.add.zone(scene.scale.width - padding - buttonSize / 2, scene.scale.height - padding - buttonSize / 2, buttonSize, buttonSize)
-        .setScrollFactor(0)
-        .setDepth(1)
-        .setInteractive();
-    const jumpGraphics = scene.add.graphics();
-    jumpGraphics.fillStyle(0xFF0000, 0.5);
-    jumpGraphics.fillCircle(0, 0, buttonSize / 2);
-    jumpGraphics.generateTexture('jumpButton', buttonSize, buttonSize);
-    jumpGraphics.destroy();
-										
-							 
-    scene.add.image(jumpButton.x, jumpButton.y, 'jumpButton').setDepth(1);
+    // Add Right Button Image
+    const rightButtonImage = scene.add.image(rightButton.x, rightButton.y, 'rightButtonTexture').setDepth(1).setName('rightButtonImage');
+    // Add Right Arrow Text
+    scene.add.text(rightButton.x, rightButton.y, '▶', { fontSize: '36px', fill: '#ffffff' }).setOrigin(0.5).setDepth(2);
 
-				  
-																										   
-																											 
-    scene.add.text(jumpButton.x, jumpButton.y, '▲', { fontSize: '32px', fill: '#ffffff' }).setOrigin(0.5).setDepth(2);
-
-    // Input flags
+    // Initialize Input Flags
     leftButton.isDown = false;
     rightButton.isDown = false;
-    jumpButton.isDown = false;
 
-    // Input Events for Left Button
+    // Input Event Listeners for Left Button
     leftButton.on('pointerdown', () => { 
         leftButton.isDown = true; 
-        console.log('Left Button Pressed');
+        // Visual Feedback: Scale down slightly
+        scene.add.tween({
+            targets: leftButtonImage,
+            scale: 0.9,
+            duration: 100,
+            yoyo: true
+        });
     });
     leftButton.on('pointerup', () => { 
         leftButton.isDown = false; 
-        console.log('Left Button Released');
     });
     leftButton.on('pointerout', () => { 
         leftButton.isDown = false; 
-        console.log('Left Button Released');
     });
 
-    // Input Events for Right Button
+    // Input Event Listeners for Right Button
     rightButton.on('pointerdown', () => { 
         rightButton.isDown = true; 
-        console.log('Right Button Pressed');
+        // Visual Feedback: Scale down slightly
+        scene.add.tween({
+            targets: rightButtonImage,
+            scale: 0.9,
+            duration: 100,
+            yoyo: true
+        });
     });
     rightButton.on('pointerup', () => { 
         rightButton.isDown = false; 
-        console.log('Right Button Released');
     });
     rightButton.on('pointerout', () => { 
         rightButton.isDown = false; 
-        console.log('Right Button Released');
-    });
-
-    // Input Events for Jump Button
-    jumpButton.on('pointerdown', () => { 
-        if (bozo.body.touching.down) {
-            bozo.setVelocityY(-330);
-            console.log('Jump Button Pressed');
-        }
-    });
-    jumpButton.on('pointerup', () => { 
-        jumpButton.isDown = false; 
-        console.log('Jump Button Released');
-    });
-    jumpButton.on('pointerout', () => { 
-        jumpButton.isDown = false; 
-        console.log('Jump Button Released');
     });
 }
 
@@ -499,11 +465,12 @@ function resize (gameSize, baseSize, displaySize, resolution) {
     timerText.setPosition(16, 50);
 
     // Reposition on-screen buttons
-    if (leftButton) {
-        const padding = 20;
-        leftButton.setPosition(padding + leftButton.width / 2, height - padding - leftButton.height / 2);
-        rightButton.setPosition(padding * 2 + leftButton.width * 1.5, height - padding - rightButton.height / 2);
-        jumpButton.setPosition(width - padding - jumpButton.width / 2, height - padding - jumpButton.height / 2);
+    if (leftButton && rightButton) {
+        const buttonSize = 80;
+        const padding = 30;
+
+        leftButton.setPosition(padding + buttonSize / 2, height - padding - buttonSize / 2);
+        rightButton.setPosition(width - padding - buttonSize / 2, height - padding - buttonSize / 2);
     }
 
     // Reposition logo
