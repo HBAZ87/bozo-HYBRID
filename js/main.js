@@ -292,11 +292,15 @@ function endGame(scene) {
     });
     shareButton.setOrigin(0.5);
     shareButton.setInteractive({ useHandCursor: true });
-    shareButton.on('pointerdown', () => {
-        const tweetText = encodeURIComponent(`I helped Bozo bozify the world in ${elapsedTime} seconds in #BozoCryptoCaper! Join me!`);
-        const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(window.location.href)}`;
-        window.open(tweetUrl, '_blank');
-    });
+	shareButton.on('pointerdown', () => {
+		console.log('Share Button Pressed');
+		const elapsedTime = Math.floor((scene.time.now - startTime) / 1000) || 0;
+		const tweetText = encodeURIComponent(`I helped Bozo bozify the world in ${elapsedTime} seconds in #BozoCryptoCaper! Join me!`);
+		const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(window.location.href)}`;
+		
+		window.open(tweetUrl);
+	});
+
 }
 
 // Function to create Bozo Hybrid Logo
