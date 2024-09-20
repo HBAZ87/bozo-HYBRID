@@ -32,7 +32,7 @@ let tokens;
 let cursors;
 let score = 0;
 let totalTokens = 0;
-const evolutionThreshold = 800; // Updated threshold to 800 tokens
+const evolutionThreshold = 8; // Updated threshold to 800 tokens
 let evolutionStage = 0;
 let bozoTextures = [];
 let tokenSpawner;
